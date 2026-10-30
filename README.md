@@ -112,19 +112,24 @@ the plain human paragraph, with model 0.86 and style 0.49, a gap of 0.37. The 50
      thresholds in Milestone 4. -->
 
 **Who:**
+A real person, for example a student who writes in English as a second language and uses simple words and short sentences. You wrote about this in your Signal one blind spot.
 
-**Their scores:** model_score ≈ ___ , style_score ≈ ___ → combined ≈ ___
+**Their scores:** model_score ≈ 0.86 , style_score ≈ 0.49→ combined ≈ 0.60
 
 <!-- Thresholds in config.py: below 0.35 = human, 0.35–0.65 = unsure,
      above 0.65 = AI -->
 
 **What the label said to them:**
+"We can't tell if a human or AI wrote this."
 
 **Does it read as an accusation?**
+No, it is not an an accusation.
 
 **What they can do about it:**
+They can copy 'content_id' and 'send POST /appeal' with their reasoning. The status changes to under_review and a person reviews it.
 
 **What this means for my thresholds:**
+Without the disagreement cap, the 50/50 average gave 0.674, above 0.65, so the label would have been AI. The cap keeps them in "unsure". That's why I chose that rule.
 
 ### Endpoint contracts
 
@@ -133,17 +138,19 @@ the plain human paragraph, with model 0.86 and style 0.49, a gap of 0.37. The 50
 
 **POST /submit**
 
-- In:
-- Out (success):
-- Out (error):
+- In: `text` (string, required, not empty, at most 20,000 characters), `creator_id` (string, required)
+- Out (success, 200): `content_id`, `guess` ("human" / "unsure" / "ai"), `confidence` (0–1), `label` (the sentence the writer sees), `model_score` (0–1), `style_score` (0–1)
+- Out (error, 400): `{error, message}` when text or creator_id is missing, empty, too long, or text is too short to score
 
 **POST /appeal**
 
-- In:
-- Out (success):
-- Out (error):
+- In: `content_id` (string, must match a submission in the log), `reasoning` (string, required)
+- Out (success, 200): `content_id`, `status` ("under_review"), `message` (confirmation for the writer)
+- Out (error, 400): `{error, message}` when content_id or reasoning is missing
+- Out (error, 404): `{error, message}` when no submission has that content_id
 
----
+
+---------
 
 ## Label Variants
 
@@ -251,15 +258,22 @@ $ curl "http://127.0.0.1:5000/log?limit=2"
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I ask AI explain the content step by steps. Do not do it for me.
+- *What came back:* AI explain it to me clearly and showed me which line what I did wrong. It told me to edit it.
+- For example: I wort this 
+"LABEL_HUMAN = "We think a person wrote this."
+LABEL_UNSURE = "We can't tell if a human or AI wrote this."
+LABEL_AI = "They might be wrong, and I have a way to fix it.""
 
+- *What I changed:*
+LABEL_HUMAN = "We think a person wrote this."
+LABEL_UNSURE = "We can't tell if a human or AI wrote this."
+LABEL_AI = "We think it was probably from AI. If you wrote this yourself, you can ask for a review."
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I did not know how to run 'cure.exe'
+- *What came back:* AI explain clearly how to run it.
+- *What I changed:* I change a new terminal and run the code follow AI suggest. It works!
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
