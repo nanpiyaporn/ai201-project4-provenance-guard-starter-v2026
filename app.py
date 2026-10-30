@@ -30,6 +30,8 @@ from flask import Flask, jsonify, request
 
 import audit
 import config
+import scoring
+import stylometry
 
 app = Flask(__name__)
 
@@ -246,12 +248,13 @@ def submit():
         audit.log_rejection(creator_id=creator_id, reason="too_short", detail=str(exc))
         return jsonify({"error": "too_short", "message": str(exc)}), 400
 
+    style_score = stylometry.style_signal(text)
+    confidence = scoring.combine_signals(model_score, style_score)
+
     content_id = str(uuid.uuid4())
 
-    # Placeholders until Milestones 4 and 5: the guess comes from the model
-    # signal alone, and confidence/label aren't real yet.
-    guess = "ai" if model_score >= 0.5 else "human"
-    confidence = 0.0
+    # The label text is a placeholder until Milestone 5.
+    guess, _ = scoring.score_to_label(confidence)
     label = "pending"
 
     audit.log_decision(
@@ -259,6 +262,8 @@ def submit():
         creator_id=creator_id,
         guess=guess,
         model_score=model_score,
+        style_score=style_score,
+        combined_score=confidence,
         label=label,
         status="decided",
     )
@@ -269,7 +274,7 @@ def submit():
         "confidence": confidence,
         "label": label,
         "model_score": model_score,
-        "style_score": None,
+        "style_score": style_score,
     })
 
 

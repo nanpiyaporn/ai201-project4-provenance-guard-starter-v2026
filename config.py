@@ -57,6 +57,12 @@ DETECTOR_MAX_TOKENS = 400
 WEIGHT_MODEL_SIGNAL = 0.5
 WEIGHT_STYLE_SIGNAL = 0.5
 
+# When the two signals disagree by more than this, the combined score is
+# capped so it can't reach the AI label. Two methods disagreeing is
+# uncertainty, and the person on the other end may have written every word.
+DISAGREEMENT_GAP = 0.30
+DISAGREEMENT_CAP = 0.60
+
 
 # ─── Thresholds (Milestone 5) ────────────────────────────────────────────────
 # Where one label becomes another. Scores run 0.0 (confidently human) to 1.0

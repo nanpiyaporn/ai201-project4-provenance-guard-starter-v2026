@@ -52,11 +52,17 @@ def combine_signals(model_score: float, style_score: float) -> float:
     The weights in config.py are placeholders. Change them, or ignore them and
     write a different rule.
     """
-    # TODO: replace this
-    return (
+    # Mine: a 50/50 average, unless the signals disagree by more than
+    # DISAGREEMENT_GAP — then the score is capped at DISAGREEMENT_CAP, inside
+    # the unsure band. The case this exists for: plain human writing, which
+    # the model signal reads as AI (0.86) and the style signal doesn't (0.49).
+    score = (
         config.WEIGHT_MODEL_SIGNAL * model_score
         + config.WEIGHT_STYLE_SIGNAL * style_score
     )
+    if abs(model_score - style_score) > config.DISAGREEMENT_GAP:
+        score = min(score, config.DISAGREEMENT_CAP)
+    return round(score, 4)
 
 
 def score_to_label(score: float) -> tuple[str, str]:

@@ -86,17 +86,20 @@ If AI writes more typos, it will more likely like a human style more.
      signals disagree? -->
 
 **The rule:**
+describe the disagreement cap in plain words.
 
 **The numbers:**
+weights 0.5 and 0.5, gap 0.30, cap 0.60, thresholds 0.35 and 0.65.
 
 **Where it lives:** `scoring.py::combine_signals`
 
 <!-- ⚠️ The grader checks your code against that line. If your rule lives
      somewhere else, say where. -->
 
+
 **A case where my two signals split, and what my rule does with it:**
 
-
+the plain human paragraph, with model 0.86 and style 0.49, a gap of 0.37. The 50/50 average would give 0.674 and label it AI. The cap brings it down to 0.60, so it's labeled unsure
 
 ---
 

@@ -63,9 +63,18 @@ def sentence_length_spread(text: str) -> float:
     Watch the edge case: a one-sentence submission has no spread at all, and
     `stdev` raises on fewer than two values. Decide what that should return
     before the attack set decides for you.
+
+    Mine: coefficient of variation (stdev / mean) of words per sentence.
+    0.0 means every sentence is the same length; higher means lumpier, which
+    points human. Fewer than two sentences returns 0.0, and `style_signal`
+    treats that case as "no evidence" rather than "perfectly even".
     """
-    # TODO: replace this
-    return 0.0
+    lengths = [len(words(s)) for s in sentences(text)]
+    lengths = [n for n in lengths if n > 0]
+    if len(lengths) < 2:
+        return 0.0
+    mean = statistics.mean(lengths)
+    return round(statistics.stdev(lengths) / mean, 4)
 
 
 def type_token_ratio(text: str) -> float:
@@ -79,9 +88,22 @@ def type_token_ratio(text: str) -> float:
     longer, because common words repeat. Two texts of different lengths aren't
     directly comparable on it, and if your test inputs vary a lot in length,
     that alone can look like a signal.
+
+    Mine: a moving-window TTR. Plain TTR over every 50-word window, averaged,
+    so a 400-word essay and a 100-word one are on the same footing. Under 50
+    words it falls back to plain TTR, which runs high on short text.
     """
-    # TODO: replace this
-    return 0.0
+    tokens = words(text)
+    if not tokens:
+        return 0.0
+    window = 50
+    if len(tokens) <= window:
+        return round(len(set(tokens)) / len(tokens), 4)
+    ratios = [
+        len(set(tokens[i:i + window])) / window
+        for i in range(len(tokens) - window + 1)
+    ]
+    return round(statistics.mean(ratios), 4)
 
 
 def punctuation_density(text: str) -> float:
@@ -93,9 +115,16 @@ def punctuation_density(text: str) -> float:
         semicolons, dashes — is a real choice. Semicolons and em dashes are
         more interesting than full stops, because they vary more between
         writers.
+
+    Mine: marks per word, counting everything except the full stop — commas,
+    semicolons, colons, dashes, brackets, quotes, ! and ?. Full stops are left
+    out because every sentence has one, so they only measure sentence count.
     """
-    # TODO: replace this
-    return 0.0
+    tokens = words(text)
+    if not tokens:
+        return 0.0
+    marks = re.findall(r"[,;:!?()\"“”—–]|(?<!\w)-(?!\w)|--", text)
+    return round(len(marks) / len(tokens), 4)
 
 
 # ── Combining them ───────────────────────────────────────────────────────────
@@ -121,9 +150,36 @@ def style_signal(text: str) -> float:
     clearly human, plain conventional human writing, lightly-edited AI — before
     you trust it. Plain and ordinary, not formal: formal prose reads as *human*
     to signal one, and it is plain writing that gets accused.
+
+    Mine. Each measure is mapped onto 0–1 "AI-ness" with a straight line
+    between two anchors, read off the calibration table (`calibrate.py`),
+    then clipped:
+
+        spread        0.60 or more -> 0.0 (human)   0.25 or less -> 1.0 (AI)
+        punctuation   0.03 or less -> 0.0           0.12 or more -> 1.0
+        ttr           0.92 or more -> 0.0           0.80 or less -> 1.0
+
+    Punctuation runs the "unexpected" way: generated prose is comma-heavy
+    (lists, "however,", "including X, Y, and Z"), while plain human writing
+    barely punctuates at all. TTR runs the way the brief expects, but on my
+    inputs it barely separates anything, so it gets the smallest weight.
+
+        style = 0.45 * spread + 0.40 * punctuation + 0.15 * ttr
+
+    One sentence gives no spread evidence, so spread counts as 0.5 there.
     """
-    # TODO: replace this
-    return 0.5
+    def scale(value, human_end, ai_end):
+        return min(max((value - human_end) / (ai_end - human_end), 0.0), 1.0)
+
+    if len(sentences(text)) < 2:
+        spread_ai = 0.5
+    else:
+        spread_ai = scale(sentence_length_spread(text), 0.60, 0.25)
+    punct_ai = scale(punctuation_density(text), 0.03, 0.12)
+    ttr_ai = scale(type_token_ratio(text), 0.92, 0.80)
+
+    score = 0.45 * spread_ai + 0.40 * punct_ai + 0.15 * ttr_ai
+    return round(score, 4)
 
 
 if __name__ == "__main__":
