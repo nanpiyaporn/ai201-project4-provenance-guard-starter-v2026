@@ -147,6 +147,19 @@ def health():
         "log_entries": len(audit.read_entries()),
     })
 
+----------------
+POST /submit
+  IN:  text (string, required, non-empty, max N chars)
+       creator_id (string, required)
+  OUT 200: content_id, guess ("human"|"ai"|"unsure"), confidence (0–1),
+           label (reader-facing sentence), model_score (0–1), style_score (0–1)
+  OUT 400: {error, message}  when text/creator_id missing, empty, or too long
+
+POST /appeal
+  IN:  content_id (string, must exist in log), reasoning (string, required)
+  OUT 200: content_id, status ("under_review"), message (confirmation to writer)
+  OUT 404: {error, message}  when content_id not found
+  OUT 400: when fields are missing
 
 # ── YOU BUILD THIS ────────────────────────────────────────────────────────────
 

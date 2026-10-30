@@ -40,6 +40,13 @@
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
 
 
+1. Writer sends 'POST /submit' with 'text' and 'creator_id', so the system has raw text and knows who sent it.
+2. app.py checks the input. Missing, empty or very long text gets a clear error instead of a crash.
+3. 'detector.model_signal' turns the text into a 'model_score' (0–1).
+4. 'stylometry.style_signal' turns it into a 'style_score' (0–1).
+5. 'scoring.combine_signals' merges the two into one confidence score.
+6. 'scoring.score_to_label' turns that number into a sentence a reader can understand.
+7. 'audit.log_decision' saves everything under a 'content_id', and the response goes back to the writer. If they disagree, they can use that id with '/appeal'.
 
 ---
 
@@ -53,19 +60,25 @@
 
 ### Signal one — the model signal
 
-**What it measures:**
+**What it measures:** 
+It measure perplexity meaning how predictable the text is to GPT-2
 
 **Why that might differ between human and AI writing:**
+AI text is predictable because the model picks likely next words.
 
 **What it can't see:**
+Usually, people who use English as a second language as I am. I always try to use a simple word. But AI like to use a difference vocabulary that human (professional use).
 
 ### Signal two — the style signal
 
 **What it measures:**
+It measure shape of the text ( how long of the sentence)
 
 **Why that might differ between human and AI writing:**
+AI temps to write not to long and not too short. It seems like the same length mostly. 
 
 **What it can't see:**
+If AI writes more typos, it will more likely like a human style more.
 
 ### The combining rule
 
@@ -84,6 +97,48 @@
 **A case where my two signals split, and what my rule does with it:**
 
 
+
+---
+
+## Design Notes (Milestone 1)
+
+### The false positive
+
+<!-- A real writer submits real work and the system calls it AI. Follow that
+     person through the service. This is the scenario that decides the
+     thresholds in Milestone 4. -->
+
+**Who:**
+
+**Their scores:** model_score ≈ ___ , style_score ≈ ___ → combined ≈ ___
+
+<!-- Thresholds in config.py: below 0.35 = human, 0.35–0.65 = unsure,
+     above 0.65 = AI -->
+
+**What the label said to them:**
+
+**Does it read as an accusation?**
+
+**What they can do about it:**
+
+**What this means for my thresholds:**
+
+### Endpoint contracts
+
+<!-- Field by field: what goes in, what comes out. Could someone else build
+     against this without asking a question? -->
+
+**POST /submit**
+
+- In:
+- Out (success):
+- Out (error):
+
+**POST /appeal**
+
+- In:
+- Out (success):
+- Out (error):
 
 ---
 
