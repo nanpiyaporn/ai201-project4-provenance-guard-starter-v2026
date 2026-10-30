@@ -42,7 +42,7 @@ Two things worth knowing before you pick numbers:
   a **miss**.
 
 ---
-## 1.
+## 1. False positive
 
 <!-- Your criterion. It must name a number. -->
 
@@ -50,54 +50,54 @@ Two things worth knowing before you pick numbers:
 
 **Why this target:**
 
-
+It designs like how many human write sentence or AI
 
 ---
 
-## 2.
+## 2. Score spread
 
 <!-- Your criterion. -->
 
 
 
 **Why this target:**
-
+It is for how far apart of text score ( Human vs AI). It checks the difference in average score. Ex a gap is 0.05 means the system can not tell the difference between human and AI 
 
 
 ---
 
-## 3.
+## 3. Label coverage
 
 <!-- Your criterion. -->
 
 
 
 **Why this target:**
-
+Is is for checking such as what input should produce each one? how many time is unsure label on.
 
 
 ---
 
-## 4.
+## 4. The appeal path
 
 <!-- Your criterion. -->
 
 
 
 **Why this target:**
-
+For checking after an appeal about the true? For example, is the appeal in /log?
 
 
 ---
 
-## 5.
+## 5. Bad input
 
 <!-- Your criterion. -->
 
 
 
 **Why this target:**
-
+For checking if it missing ot empty text when it return. For example, code 400 or 413. Not 500 or crash.
 
 
 ---
