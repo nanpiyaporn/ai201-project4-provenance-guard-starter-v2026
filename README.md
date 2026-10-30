@@ -86,7 +86,7 @@ If AI writes more typos, it will more likely like a human style more.
      signals disagree? -->
 
 **The rule:**
-describe the disagreement cap in plain words.
+I averages the 2 signals out. If its disagree > 0.30 the score is capped at 0.60, so the text get 'unsure' instead of 'AI' because in general a good writer remains a good adjustment (not accused things) 
 
 **The numbers:**
 weights 0.5 and 0.5, gap 0.30, cap 0.60, thresholds 0.35 and 0.65.
@@ -154,16 +154,16 @@ the plain human paragraph, with model 0.86 and style 0.49, a gap of 0.37. The 50
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human |  |  |
-| unsure |  |  |
-| high-confidence AI |  |  |
+| high-confidence human | 0.00 – 0.35 | We think a person wrote this. |
+| unsure | 0.35 – 0.65 | We can't tell if a human or AI wrote this. |
+| high-confidence AI | 0.65 – 1.00 | We think it was probably from AI. If you wrote this yourself, you can ask for a review. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
      sounding like an accusation, because the person reading it may well have
      written every word themselves. -->
 
-
+I use the word " can't tell" because it does not blame the writer
 
 ---
 
@@ -185,17 +185,14 @@ $ curl -X POST http://127.0.0.1:5000/submit \
   -d '{"text": "Artificial intelligence has transformed the way we live and work. It offers numerous benefits, including increased efficiency, improved decision-making, and enhanced productivity. However, it is important to consider the ethical implications of this technology.", "creator_id": "student-01"}'
 ```
 
-<!-- Milestone 3: one signal only. style_score, confidence and label are
-     placeholders until Milestones 4 and 5. -->
-
 ```json
 {
-  "confidence": 0.0,
-  "content_id": "29d939af-53bc-44a6-afb9-1bc921d9f5db",
+  "confidence": 0.8699,
+  "content_id": "4b8257ea-e969-4148-8a53-18153e4d3f43",
   "guess": "ai",
-  "label": "pending",
+  "label": "We think it was probably from AI. If you wrote this yourself, you can ask for a review.",
   "model_score": 0.908,
-  "style_score": null
+  "style_score": 0.8318
 }
 ```
 
@@ -204,33 +201,45 @@ $ curl -X POST http://127.0.0.1:5000/submit \
 ```bash
 $ curl -X POST http://127.0.0.1:5000/appeal \
   -H "Content-Type: application/json" \
-  -d '{"content_id": "...", "reasoning": "..."}'
+  -d '{"content_id": "4b8257ea-e969-4148-8a53-18153e4d3f43", "reasoning": "I wrote this myself for my class."}'
 ```
 
 ```json
-
+{
+  "content_id": "4b8257ea-e969-4148-8a53-18153e4d3f43",
+  "message": "Thanks — your appeal has been recorded and a person will review this decision. The original result is on hold until then.",
+  "status": "under_review"
+}
 ```
 
 **What the log shows afterwards**
 
 ```bash
-$ curl "http://127.0.0.1:5000/log?limit=1"
+$ curl "http://127.0.0.1:5000/log?limit=2"
 ```
 
 ```json
 {
-  "count": 1,
+  "count": 2,
   "entries": [
     {
-      "combined_score": null,
-      "content_id": "29d939af-53bc-44a6-afb9-1bc921d9f5db",
+      "combined_score": 0.8699,
+      "content_id": "4b8257ea-e969-4148-8a53-18153e4d3f43",
       "creator_id": "student-01",
       "guess": "ai",
-      "label": "pending",
+      "label": "We think it was probably from AI. If you wrote this yourself, you can ask for a review.",
       "model_score": 0.908,
       "status": "decided",
-      "style_score": null,
-      "timestamp": "2026-10-30T00:54:22+00:00"
+      "style_score": 0.8318,
+      "timestamp": "2026-10-30T02:12:37+00:00"
+    },
+    {
+      "content_id": "4b8257ea-e969-4148-8a53-18153e4d3f43",
+      "creator_id": "student-01",
+      "event": "appeal",
+      "reasoning": "I wrote this myself for my class.",
+      "status": "under_review",
+      "timestamp": "2026-10-30T02:19:04+00:00"
     }
   ]
 }

@@ -18,6 +18,14 @@ you claim, so that line should read `scoring.py::combine_signals`.
 
 import config
 
+# ── The three labels, exactly as a reader sees them (Milestone 5) ────────────
+# Written for someone who has never heard the word "threshold". Keep these in
+# step with the Label Variants table in the README.
+
+LABEL_HUMAN = "We think a person wrote this."
+LABEL_UNSURE = "We can't tell if a human or AI wrote this."
+LABEL_AI = "We think it was probably from AI. If you wrote this yourself, you can ask for a review."
+
 
 def combine_signals(model_score: float, style_score: float) -> float:
     """
@@ -91,12 +99,13 @@ def score_to_label(score: float) -> tuple[str, str]:
     think if they got it on their own work. That question is the whole
     milestone.
     """
-    # TODO: replace this — thresholds are in config.py
+    # Thresholds are in config.py. The boundaries are inclusive on the outer
+    # labels, so there is no score that falls between two ranges.
     if score >= config.AI_THRESHOLD:
-        return "ai", "PLACEHOLDER — write the high-confidence AI label."
+        return "ai", LABEL_AI
     if score <= config.HUMAN_THRESHOLD:
-        return "human", "PLACEHOLDER — write the high-confidence human label."
-    return "unsure", "PLACEHOLDER — write the unsure label."
+        return "human", LABEL_HUMAN
+    return "unsure", LABEL_UNSURE
 
 
 def label_ranges() -> list[tuple[str, str]]:
