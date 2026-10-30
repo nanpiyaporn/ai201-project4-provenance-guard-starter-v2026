@@ -258,22 +258,25 @@ $ curl "http://127.0.0.1:5000/log?limit=2"
 
 **Moment 1**
 
-- *What I asked for:* I ask AI explain the content step by steps. Do not do it for me.
+- *What I asked for:* I ask AI explain the content step by steps. I also picked the combining rule and wrote the labels.
 - *What came back:* AI explain it to me clearly and showed me which line what I did wrong. It told me to edit it.
+- 
 - For example: I wort this 
-"LABEL_HUMAN = "We think a person wrote this."
+LABEL_HUMAN = "We think a person wrote this."
 LABEL_UNSURE = "We can't tell if a human or AI wrote this."
-LABEL_AI = "They might be wrong, and I have a way to fix it.""
+LABEL_AI = "They might be wrong, and I have a way to fix it.
 
 - *What I changed:*
 LABEL_HUMAN = "We think a person wrote this."
 LABEL_UNSURE = "We can't tell if a human or AI wrote this."
 LABEL_AI = "We think it was probably from AI. If you wrote this yourself, you can ask for a review."
+
 **Moment 2**
 
 - *What I asked for:* I did not know how to run 'cure.exe'
 - *What came back:* AI explain clearly how to run it.
 - *What I changed:* I change a new terminal and run the code follow AI suggest. It works!
+- 
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
