@@ -179,11 +179,21 @@ If AI writes more typos, it will more likely like a human style more.
 ```bash
 $ curl -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
-  -d '{"text": "...", "creator_id": "..."}'
+  -d '{"text": "Artificial intelligence has transformed the way we live and work. It offers numerous benefits, including increased efficiency, improved decision-making, and enhanced productivity. However, it is important to consider the ethical implications of this technology.", "creator_id": "student-01"}'
 ```
 
-```json
+<!-- Milestone 3: one signal only. style_score, confidence and label are
+     placeholders until Milestones 4 and 5. -->
 
+```json
+{
+  "confidence": 0.0,
+  "content_id": "29d939af-53bc-44a6-afb9-1bc921d9f5db",
+  "guess": "ai",
+  "label": "pending",
+  "model_score": 0.908,
+  "style_score": null
+}
 ```
 
 **An appeal**
@@ -201,11 +211,26 @@ $ curl -X POST http://127.0.0.1:5000/appeal \
 **What the log shows afterwards**
 
 ```bash
-$ curl "http://127.0.0.1:5000/log?limit=3"
+$ curl "http://127.0.0.1:5000/log?limit=1"
 ```
 
 ```json
-
+{
+  "count": 1,
+  "entries": [
+    {
+      "combined_score": null,
+      "content_id": "29d939af-53bc-44a6-afb9-1bc921d9f5db",
+      "creator_id": "student-01",
+      "guess": "ai",
+      "label": "pending",
+      "model_score": 0.908,
+      "status": "decided",
+      "style_score": null,
+      "timestamp": "2026-10-30T00:54:22+00:00"
+    }
+  ]
+}
 ```
 
 ---

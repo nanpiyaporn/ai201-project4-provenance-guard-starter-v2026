@@ -147,21 +147,24 @@ def health():
         "log_entries": len(audit.read_entries()),
     })
 
-----------------
-POST /submit
-  IN:  text (string, required, non-empty, max N chars)
-       creator_id (string, required)
-  OUT 200: content_id, guess ("human"|"ai"|"unsure"), confidence (0–1),
-           label (reader-facing sentence), model_score (0–1), style_score (0–1)
-  OUT 400: {error, message}  when text/creator_id missing, empty, or too long
-
-POST /appeal
-  IN:  content_id (string, must exist in log), reasoning (string, required)
-  OUT 200: content_id, status ("under_review"), message (confirmation to writer)
-  OUT 404: {error, message}  when content_id not found
-  OUT 400: when fields are missing
+# ── The contract (Milestone 1) ───────────────────────────────────────────────
+# POST /submit
+#   IN:  text (string, required, non-empty, max N chars)
+#        creator_id (string, required)
+#   OUT 200: content_id, guess ("human"|"ai"|"unsure"), confidence (0–1),
+#            label (reader-facing sentence), model_score (0–1), style_score (0–1)
+#   OUT 400: {error, message}  when text/creator_id missing, empty, or too long
+#
+# POST /appeal
+#   IN:  content_id (string, must exist in log), reasoning (string, required)
+#   OUT 200: content_id, status ("under_review"), message (confirmation to writer)
+#   OUT 404: {error, message}  when content_id not found
+#   OUT 400: when fields are missing
 
 # ── YOU BUILD THIS ────────────────────────────────────────────────────────────
+
+# Roughly 10 pages. The detector only reads the first 400 tokens anyway.
+MAX_TEXT_CHARS = 20_000
 
 @app.post("/submit")
 # @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
@@ -212,17 +215,62 @@ def submit():
     what should this do when `text` is missing, empty, or enormous? A crash on
     a malformed input is one of the most common real failures there is.
     """
-    payload = request.get_json(silent=True) or {}
+    import detector
 
-    # TODO: delete this and build the route.
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        payload = {}
+
+    text = payload.get("text")
+    creator_id = payload.get("creator_id")
+
+    # Bad input gets a 400 and a trace in the log, never a crash.
+    error = None
+    if not isinstance(text, str) or not text.strip():
+        error = "text is required and must be a non-empty string."
+    elif len(text) > MAX_TEXT_CHARS:
+        error = f"text is too long — at most {MAX_TEXT_CHARS} characters."
+    elif not isinstance(creator_id, str) or not creator_id.strip():
+        error = "creator_id is required and must be a non-empty string."
+    if error:
+        audit.log_rejection(
+            creator_id=creator_id if isinstance(creator_id, str) else "unknown",
+            reason="bad_input",
+            detail=error,
+        )
+        return jsonify({"error": "bad_input", "message": error}), 400
+
+    try:
+        model_score = detector.model_signal(text)
+    except ValueError as exc:  # too short to score
+        audit.log_rejection(creator_id=creator_id, reason="too_short", detail=str(exc))
+        return jsonify({"error": "too_short", "message": str(exc)}), 400
+
+    content_id = str(uuid.uuid4())
+
+    # Placeholders until Milestones 4 and 5: the guess comes from the model
+    # signal alone, and confidence/label aren't real yet.
+    guess = "ai" if model_score >= 0.5 else "human"
+    confidence = 0.0
+    label = "pending"
+
+    audit.log_decision(
+        content_id=content_id,
+        creator_id=creator_id,
+        guess=guess,
+        model_score=model_score,
+        label=label,
+        status="decided",
+    )
+
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /submit isn't built yet — see the TODO in app.py.",
-        "you_sent": {
-            "text_length": len(payload.get("text", "")),
-            "creator_id": payload.get("creator_id"),
-        },
-    }), 501
+        "content_id": content_id,
+        "guess": guess,
+        "confidence": confidence,
+        "label": label,
+        "model_score": model_score,
+        "style_score": None,
+    })
 
 
 @app.post("/appeal")

@@ -1,0 +1,6 @@
+{"timestamp": "2026-10-30T00:54:22+00:00", "content_id": "29d939af-53bc-44a6-afb9-1bc921d9f5db", "creator_id": "student-01", "guess": "ai", "model_score": 0.908, "style_score": null, "combined_score": null, "label": "pending", "status": "decided"}
+{"timestamp": "2026-10-30T00:54:22+00:00", "creator_id": "student-01", "event": "rejected", "status": "rejected", "reason": "bad_input", "detail": "text is required and must be a non-empty string."}
+{"timestamp": "2026-10-30T00:54:22+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "bad_input", "detail": "text is required and must be a non-empty string."}
+{"timestamp": "2026-10-30T01:14:28+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "bad_input", "detail": "text is required and must be a non-empty string."}
+{"timestamp": "2026-10-30T01:16:05+00:00", "creator_id": "unknown", "event": "rejected", "status": "rejected", "reason": "bad_input", "detail": "text is required and must be a non-empty string."}
+{"timestamp": "2026-10-30T01:20:37+00:00", "content_id": "8a0db3ea-f0fd-4b0e-b3f5-a9afc6422c89", "creator_id": "student-01", "guess": "ai", "model_score": 0.908, "style_score": null, "combined_score": null, "label": "pending", "status": "decided"}
