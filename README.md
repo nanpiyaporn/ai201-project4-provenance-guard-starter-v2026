@@ -408,14 +408,26 @@ Wrote results\attack_run_2026-11-04_2054_before.md
 <!-- Choose entries that show the interesting failures, not the ten easiest. -->
 
 ```json
+{"timestamp": "2026-11-05T01:54:12+00:00", "content_id": "ea1d2c96-3940-4c5b-8544-d45742b0faf4", "creator_id": "attacker_FP02", "guess": "ai", "model_score": 0.7387, "style_score": 0.6, "combined_score": 0.6694, "label": "We think it was probably from AI. If you wrote this yourself, you can ask for a review.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:12+00:00", "content_id": "09a3e3fa-755a-405a-a11d-61c6ea2621a5", "creator_id": "attacker_FP05", "guess": "ai", "model_score": 0.8005, "style_score": 0.5654, "combined_score": 0.6829, "label": "We think it was probably from AI. If you wrote this yourself, you can ask for a review.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:10+00:00", "content_id": "01f2a388-d062-4290-ad59-0b3c5a66131c", "creator_id": "attacker_EV01", "guess": "human", "model_score": 0.1635, "style_score": 0.4736, "combined_score": 0.3185, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:10+00:00", "content_id": "783e3e0e-ea57-4541-9f33-cbc88066ffce", "creator_id": "attacker_EV02", "guess": "human", "model_score": 0.5943, "style_score": 0.0455, "combined_score": 0.3199, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:11+00:00", "content_id": "3572760d-5694-47b4-9a4e-0329bff568bd", "creator_id": "attacker_EV05", "guess": "human", "model_score": 0.3212, "style_score": 0.2135, "combined_score": 0.2673, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:13+00:00", "content_id": "be4d27e3-d596-42cb-a1fe-0aa0e775b1c9", "creator_id": "attacker_PI01", "guess": "human", "model_score": 0.4625, "style_score": 0.0, "combined_score": 0.2313, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:13+00:00", "content_id": "26500521-8355-4b72-bd11-337f5dba21b0", "creator_id": "attacker_PI02", "guess": "human", "model_score": 0.2044, "style_score": 0.064, "combined_score": 0.1342, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:14+00:00", "content_id": "876ba2f7-7f91-44cb-956a-f162f2cce57a", "creator_id": "attacker_MF03", "guess": "human", "model_score": 0.0, "style_score": 0.225, "combined_score": 0.1125, "label": "We think a person wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:14+00:00", "content_id": "9898ae60-3191-4f47-9eb6-e3faf5d2dd74", "creator_id": "attacker_MF06", "guess": "unsure", "model_score": 0.9969, "style_score": 0.375, "combined_score": 0.6, "label": "We can't tell if a human or AI wrote this.", "status": "decided"}
+{"timestamp": "2026-11-05T01:54:15+00:00", "creator_id": "attacker_flood", "event": "rejected", "status": "rejected", "reason": "rate_limited", "limit": "10 per 1 minute"}
+
 
 ```
 
 **The single worst outcome** — the one I'd least want to explain to a writer
 whose work got caught by it:
 
+FP05: technical documentation written by a person, labeled ai at 0.683 confidence (model_score 0.801, style_score 0.565). This is the one I'd least want to explain. The writer did nothing unusual. They wrote clear, consistent, precise documentation, which is exactly what good technical writing looks like. My service then showed them "We think it was probably from AI." Both signals pointed the wrong way: the model reads predictable, low-surprise prose as machine-like, and the style signal reads uniform sentence length and vocabulary as machine-like.Technical docs have both traits because they're well written. The combining rule averaged two wrong signals into a confident wrong answer.
 
-
+FP02 (formal register, 0.669) failed the same way, so this isn't a one-off. It means my service penalizes people who write carefully and formally, a group that includes professional writers and non-native speakers who stick to safe, regular phrasing. The appeal path exists, but it puts the burden on the person who was wrongly accused.
 ---
 
 ## Run Log and Verdicts
@@ -424,17 +436,87 @@ whose work got caught by it:
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1.False positive: human texts guessed ai  | ≤ 2 of 3 | 0/3 | 0/3 | 0/3 | MET |
+| 2. Score spread: AI avg − human avg | ≥ 1 | 0.351 |0.351  | 0.351 | MISSED |
+| 3.Label coverage: human / unsure / ai each appear  | 3 of 3 | 3/3 | 3/3 | 3/3 | MET |
+| 4.Appeal path: 3 real appeals + 1 fake id  | 4 of 4 | 4/4 | 4/4 |  4/4| MET |
+| 5. Bad input: 400 + rejected entry in log | 3 of 3 | 3/3 | 3/3 | 3/3 | MET |
 
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
 
-```json
+**Trial 1**
 
+```json
+[
+  {
+    "kind": "real",
+    "content_id": "ad790cfb-63a4-410f-8349-92c8a9d7244b",
+    "appeal_status": 200,
+    "response": {
+      "content_id": "ad790cfb-63a4-410f-8349-92c8a9d7244b",
+      "message": "Thanks \u2014 your appeal has been recorded and a person will review this decision. The original result is on hold until then.",
+      "status": "under_review"
+    },
+    "log_entry": {
+      "content_id": "ad790cfb-63a4-410f-8349-92c8a9d7244b",
+      "creator_id": "eval_appeal_t1_1",
+      "event": "appeal",
+      "reasoning": "I wrote this myself and can share my drafts.",
+      "status": "under_review",
+      "timestamp": "2026-11-05T02:19:32+00:00"
+    },
+    "passed": true
+  },
+  {
+    "kind": "real",
+    "content_id": "07ff66e8-51ea-4ea1-be14-25d806b63bda",
+    "appeal_status": 200,
+    "response": {
+      "content_id": "07ff66e8-51ea-4ea1-be14-25d806b63bda",
+      "message": "Thanks \u2014 your appeal has been recorded and a person will review this decision. The original result is on hold until then.",
+      "status": "under_review"
+    },
+    "log_entry": {
+      "content_id": "07ff66e8-51ea-4ea1-be14-25d806b63bda",
+      "creator_id": "eval_appeal_t1_2",
+      "event": "appeal",
+      "reasoning": "I wrote this myself and can share my drafts.",
+      "status": "under_review",
+      "timestamp": "2026-11-05T02:19:32+00:00"
+    },
+    "passed": true
+  },
+  {
+    "kind": "real",
+    "content_id": "bf9ca88b-d761-486b-8295-5d3298e44bc2",
+    "appeal_status": 200,
+    "response": {
+      "content_id": "bf9ca88b-d761-486b-8295-5d3298e44bc2",
+      "message": "Thanks \u2014 your appeal has been recorded and a person will review this decision. The original result is on hold until then.",
+      "status": "under_review"
+    },
+    "log_entry": {
+      "content_id": "bf9ca88b-d761-486b-8295-5d3298e44bc2",
+      "creator_id": "eval_appeal_t1_3",
+      "event": "appeal",
+      "reasoning": "I wrote this myself and can share my drafts.",
+      "status": "under_review",
+      "timestamp": "2026-11-05T02:19:32+00:00"
+    },
+    "passed": true
+  },
+  {
+    "kind": "fake",
+    "content_id": "fake-44d0a043-d0cc-45fc-a507-ecc15cd982cd",
+    "appeal_status": 404,
+    "response": {
+      "error": "not_found",
+      "message": "No submission with content_id 'fake-44d0a043-d0cc-45fc-a507-ecc15cd982cd'. Check it was copied exactly."
+    },
+    "passed": true
+  }
+]
 ```
 
 **Diagnoses**
@@ -453,7 +535,22 @@ that produced it:
 
      Look for a pattern. Five failures on one signal is one problem, not five. -->
 
+**1. Criterion 2 missed (gap 0.351, target ≥ 1): combining rule + signal one, and an unreachable target.**
+Scores run 0–1, so a gap of 1.0 would need every AI text at exactly 1.0 and every human text at exactly 0.0. The target can't be met as written. But the gap is also small for a real reason: the AI average is 0.781 and the human average is 0.430. The human average is pulled up by the plain "running" text, where signal one reads simple, predictable prose as AI (model_score 0.859). My disagreement cap holds it at 0.6, which keeps it out of "ai" but parks it at the top of "unsure". The formal "committee" text adds 0.459. Plain and formal human writing both score high on signal one, so the two groups can't separate.
 
+**2. Evasion EV02, EV06, PI01, PI02: combining rule. The disagreement cap only works in one direction.**
+In all four, the signals split badly but the average landed under 0.35, so they were labeled "human". EV02: model 0.594, style 0.046 → 0.320. PI01: model 0.463, style 0.0 → 0.231. My rule caps a split *down* to 0.6 when the average is high, but never pulls a split *up* into "unsure" when the average is low. A split is supposed to mean uncertainty, yet here it produced a confident "human". Breaking sentences into uneven lengths (EV02, EV06) pushes signal two to near 0, because my style signal weights sentence-length spread at 0.45, so it is easy to game.
+
+**3. Evasion EV01, EV05, EV08: signal one fooled.**
+Typos (EV01, model 0.164) and a heavy editing pass (EV05, model 0.321) raise perplexity, so GPT-2 finds the text surprising and reads it as human. EV08 is too short to give the model enough tokens (model 0.245). Signal two didn't catch them either, so the combined score fell into "human".
+
+**4. False positives FP02, FP05: both signals wrong in the same direction, so no cap.**
+FP05: model 0.801, style 0.565 → 0.683 "ai". FP02: model 0.739, style 0.600 → 0.669 "ai". Careful formal and technical writing is predictable (signal one) and evenly shaped (signal two). The signals agree, so the disagreement cap never fires, and the 50/50 average crosses 0.65. My only safeguard handles disagreement, not two signals that are wrong together.
+
+**5. Malformed MF03, MF04, MF05, MF06, MF07: the route.**
+Input with no real words still got a 200 and a label. Control characters and punctuation-only text were labeled "human" (MF03 0.113, MF04 0.306). Emoji, a single long word, and right-to-left script all came back "unsure" at exactly 0.600 because of the cap. My route only rejects text that is empty, whitespace-only, or too long. It never checks that the text has enough real words to score, so both signals produce numbers for text they can't read.
+
+**What held:** the rate limit (FL01: 429 after 10 requests), every RQ request-shape error (400), and MF01, MF02, MF08 (400).
 
 ---
 

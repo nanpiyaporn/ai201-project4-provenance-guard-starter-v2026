@@ -22,49 +22,44 @@ A scenario carries **either** of these:
               because you cannot express "the field is missing" as a string.
 """
 
+from calibrate import INPUTS  # the five texts criteria 1–3 are written against
+
+HUMAN_TEXTS = [INPUTS["clearly human"], INPUTS["formal human"], INPUTS["plain human"]]
+ALL_FIVE = list(INPUTS.values())  # clearly AI, clearly human, formal, plain, lightly-edited AI
+
 SCENARIOS = [
     {
-        "name": "my own writing",
+        # Criterion 1: of the 3 human texts, at most 2 get the `ai` guess.
+        "name": "false positive",
         "criterion": 1,
-        # ⚠️ PUT YOUR OWN WRITING HERE. Not AI text, not a sample from the web —
-        # things you actually wrote. This is the criterion that matters most and
-        # it's meaningless with someone else's prose.
-        "texts": [
-            "REPLACE ME with a paragraph you wrote yourself.",
-            "REPLACE ME with another one. Ten pieces is the usual number.",
-        ],
+        "texts": HUMAN_TEXTS,
     },
     {
-        "name": "label coverage",
+        # Criterion 2: avg combined score of the 2 AI texts vs the 3 human texts.
+        "name": "score spread",
         "criterion": 2,
-        # Inputs spread across your score range, so you can check all three
-        # labels are actually reachable.
-        "texts": [
-            "REPLACE ME with something you're confident is AI-generated.",
-            "REPLACE ME with something you're confident is human-written.",
-            "REPLACE ME with something genuinely borderline.",
+        "texts": ALL_FIVE,
+    },
+    {
+        # Criterion 3: human, unsure and ai each appear at least once.
+        "name": "label coverage",
+        "criterion": 3,
+        "texts": ALL_FIVE,
+    },
+    # Criterion 4 (appeal path) can't be sent as text alone — it needs a
+    # submission, then an appeal on the content_id that came back. It runs
+    # from check_appeals.py instead:  python check_appeals.py --label before
+    {
+        # Criterion 5: missing, empty, and over-20,000-character text.
+        # Every one should be a 400 (never 500) with a rejected entry in /log.
+        "name": "bad input",
+        "criterion": 5,
+        "bodies": [
+            {"creator_id": "eval_bad_missing"},                  # no text field
+            {"text": "", "creator_id": "eval_bad_empty"},
+            {"text": "a" * 20_001, "creator_id": "eval_bad_huge"},  # 1 over the cap
         ],
     },
-    # A bad-input criterion looks like this. Uncomment and adjust if that's one
-    # of your five — these are raw request bodies, sent exactly as written.
-    #
-    # {
-    #     "name": "bad input",
-    #     "criterion": 3,
-    #     "bodies": [
-    #         {"text": "", "creator_id": "eval_bad_empty"},
-    #         {"creator_id": "eval_bad_missing"},          # no text field at all
-    #         {"text": "word " * 50000, "creator_id": "eval_bad_huge"},
-    #         {"text": None, "creator_id": "eval_bad_null"},
-    #     ],
-    # },
-
-    # TODO: add what your remaining criteria need.
-    #
-    # A criterion about the appeal path can't be tested by sending text alone;
-    # it needs a submission first and then an appeal against the content_id
-    # that came back. You'll need to test that one by hand, or extend this file
-    # and run_eval.py to do it. Saying which you did is part of the write-up.
 ]
 
 
