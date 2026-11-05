@@ -278,6 +278,12 @@ LABEL_AI = "We think it was probably from AI. If you wrote this yourself, you ca
 - *What I changed:* I change a new terminal and run the code follow AI suggest. It works!
 - 
 
+**Moment 3 (Unit 8)**
+
+- *What I asked for:* I asked AI to help me read my attack results and find the stage behind each failure, and to help me write the What's Still Broken section from my results files.
+- *What came back:* AI grouped the failures by stage. For example, EV02, EV06, PI01 and PI02 are one problem (my disagreement cap only works in one direction), not four. It also pointed out that my criterion 2 target of 1.0 can't be reached on a 0–1 scale.
+- *What I changed:* I checked every score it used against `results/attack_run_2026-11-04_2223_after.md`. I kept my own decision for the improvement (raise the AI threshold to 0.70, because of FP02 and FP05) and my own call on the trade, which is fewer wrong accusations.
+
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
 ---
@@ -616,13 +622,23 @@ Yes for the problem I aimed at. It also created a new problem.
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+From `results/attack_run_2026-11-04_2223_after.md` and `results/run_2026-11-04_2223_after.md`.
 
+| What's still broken | Score | Stage | What I'd do | Why I stopped |
+|---|---|---|---|---|
+| **EV02, EV06** — AI text with broken-up or uneven sentences labeled "human" | 0.320, 0.337 | combining rule | Make the disagreement rule work both ways: if the signals differ by more than 0.30, the score can't go below 0.35 either, so a split lands in "unsure" and not "human". | It changes every score, so I'd have to rerun all three trials and check it doesn't push FP texts up. Milestone 5 allowed one change, and I used it on the false positives. |
+| **PI01, PI02** — prompt injection labeled "human" | 0.231, 0.134 | combining rule (same as above) | The same two-way rule. The injection text doesn't trick any model, because nothing reads instructions. It just splits the signals (style 0.0 and 0.064), and the low average wins. | Same reason: it's one fix for four attacks, and I ran out of time to test it properly. |
+| **EV01, EV05, EV08** — typos, heavy editing, very short text labeled "human" | 0.319, 0.267, 0.327 | signal one | For EV08: reject or return "unsure" for text under a minimum number of words, because the model can't score so few tokens. For EV01 and EV05 I don't have a fix. Typos and real editing make text truly less predictable, and that's exactly what signal one measures. | EV01/EV05 need a different kind of signal (for example, comparing against known AI phrasing), which is a bigger job than this unit. I didn't do EV08 because a minimum length also hits short real submissions like FP08. |
+| **MF03, MF04** — control characters and punctuation-only text got a 200 and a "human" label | 0.113, 0.306 | the route | In `app.py::submit`, count real letters/words after stripping control characters and punctuation. If there are too few, return 400 like empty text. MF05–MF07 (one long word, emoji, right-to-left) also only "held" because the cap parked them at 0.600, so the same check should cover them. | Ran out of time. This is the easiest fix on the list, and it would be my next change. |
+| **Criterion 2 missed** — score spread 0.351, target ≥ 1 | 0.351 | combining rule + signal one, and the target | Rewrite the target first. 1.0 is impossible on a 0–1 scale, so I'd set it to something like ≥ 0.40. Then the real fix is signal one, which scores plain human writing high (0.859 on the "running" text). | Moving a threshold can't change a score, so my Milestone 5 change couldn't touch it. Fixing signal one means changing the model signal, which I didn't have time to do and test. |
+| **Side effect of my fix** — nothing in the attack set is labeled "ai" now | EV07 0.652 | label mapping | Keep 0.70, but add the two-way disagreement rule and the input check, so the "unsure" band isn't doing all the work. Add more AI calibration texts so "ai" isn't held up by one text at 0.709. | I chose this cost on purpose (see the trade below), but I didn't get to the changes that would make it less fragile. |
 
 **The trade I'd make if this ran for real:**
 
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
 
+I'd keep going the way I went: fewer wrong accusations, even if more AI text gets an "unsure" label or slips through as "human", because a real writer told their work is AI is hurt by it, and an AI text labeled "unsure" only gets less trust. The people who pay are the readers and the honest writers who compete with AI text that no longer gets a firm label, and the reviewers who now have more "unsure" cases to look at by hand.
 
 
 <!-- ═════════════════════════════════════════════════════════════════════

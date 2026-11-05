@@ -49,9 +49,9 @@ audit log when you go looking for the ten entries to paste.
 | MF07 | malformed | text is right-to-left script | 200 | `f0cbc061-3c4c-421a-9574-b26bac1a8eba` | unsure | 0.600 | HELD |
 | MF08 | malformed | text is 60,000 characters | 400 | `—` | — | — |HELD|
 | RQ01 | malformed | no text field at all | 400 | `—` | — | — | HELD |
-| RQ02 | malformed | no creator_id | 400 | `—` | — | — |  |
+| RQ02 | malformed | no creator_id | 400 | `—` | — | — | HELD |
 | RQ03 | malformed | text is a number | 400 | `—` | — | — | HELD |
-| RQ04 | malformed | text is a list | 400 | `—` | — | — |  |
+| RQ04 | malformed | text is a list | 400 | `—` | — | — | HELD |
 | RQ05 | malformed | text is null | 400 | `—` | — | — | HELD |
 | RQ06 | malformed | creator_id is an object | 400 | `—` | — | — | HELD |
 | RQ07 | malformed | body is a JSON array, not an object | 400 | `—` | — | — | HELD |
