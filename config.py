@@ -78,7 +78,9 @@ DISAGREEMENT_CAP = 0.60
 # that decide who pays for it.
 
 HUMAN_THRESHOLD = 0.35
-AI_THRESHOLD = 0.65
+# Unit 8 improvement: raised from 0.65 to 0.70. FP02 (0.669) and FP05 (0.683)
+# were real human writing labelled "ai"; they now land in "unsure".
+AI_THRESHOLD = 0.70
 
 # ⚠️ One thing that catches people out in Milestone 5. A weighted average can
 # only land between its two inputs — so while `style_signal` is still the stub

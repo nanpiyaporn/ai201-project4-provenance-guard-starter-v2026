@@ -566,19 +566,47 @@ Input with no real words still got a 200 and a label. Control characters and pun
 
 **What I changed:**
 
+One change: `config.AI_THRESHOLD` raised from **0.65 to 0.70** in `config.py`. This widens the unsure band from 0.35–0.65 to 0.35–0.70. The signals and the combining rule are untouched, so every score is exactly the same as before. Only which label a score maps to has changed.
+
 **Which diagnosis pointed at it:**
+
+Diagnosis 4. FP02 (0.669) and FP05 (0.683) were real human writing labeled "ai". Both signals were wrong in the same direction, so my disagreement cap never fired. Both scores sat just above 0.65, so moving the line to 0.70 moves them out of the "ai" band. I picked this one because it is my single worst outcome: a real writer being told their work is AI.
 
 ### Attack Run — After
 
-<!-- Same format. `run_attacks.py --label after` -->
+Produced by `run_attacks.py::main` → `results/attack_run_2026-11-04_2223_after.md`. Scores are identical in both runs. Only the rows below changed label. Every other attack got the same label as before.
 
+| ID | Family | Score | Before (0.65) | After (0.70) | Verdict before → after |
+|---|---|---|---|---|---|
+| FP02 | false_positive | 0.669 | ai | unsure | BROKE → HELD |
+| FP05 | false_positive | 0.683 | ai | unsure | BROKE → HELD |
+| EV07 | evasion | 0.652 | ai | unsure | HELD (caught as ai) → HELD (only unsure) |
 
+| Family | Labeled ai before | Labeled ai after |
+|---|---|---|
+| false_positive (human text) | 2 of 8 | **0 of 8** |
+| evasion (AI text) | 1 of 10 | **0 of 10** |
+
+### Run Log — After
+
+Produced by `run_eval.py::main` → `results/run_2026-11-04_2223_after.md`, and `check_appeals.py::one_trial` → `results/appeals_2026-11-04_2223_after.md`.
+
+| Criterion | Target | Before (×3) | After Run 1 | After Run 2 | After Run 3 | Verdict |
+|---|---|---|---|---|---|---|
+| 1. False positive | ≤ 2 of 3 | 0/3 | 0/3 | 0/3 | 0/3 | MET |
+| 2. Score spread | ≥ 1 | 0.351 | 0.351 | 0.351 | 0.351 | MISSED |
+| 3. Label coverage | 3 of 3 | 3/3 | 3/3 | 3/3 | 3/3 | MET |
+| 4. Appeal path | 4 of 4 | 4/4 | 4/4 | 4/4 | 4/4 | MET |
+| 5. Bad input | 3 of 3 | 3/3 | 3/3 | 3/3 | 3/3 | MET |
 
 **Did it help, and how do I know:**
 
-<!-- Widening the unsure band usually fixes one problem and creates another.
-     Reporting that trade honestly is worth full credit. -->
+Yes for the problem I aimed at. It also created a new problem.
 
+- **It helped:** the number of human writers in the attack set labeled "ai" went from 2 to 0 (FP02 and FP05 both moved to "unsure"). I know it was the threshold and not run-to-run noise because the scores are identical to three decimals in both runs (0.669 and 0.683). Only the label changed.
+- **What it cost:** EV07 (AI text padded with punctuation, 0.652) used to be the only attack my service caught as "ai". Now it is "unsure". After the change, **no attack in the whole set gets the "ai" label.** The cost of a wrong accusation moved from real writers onto the site, which now lets more AI text through without a firm label.
+- **It is fragile:** the plain AI calibration text scores 0.709, only 0.009 above the new line. That is the only thing keeping criterion 3 (every label reachable) MET. A small change to that text could leave "ai" with no examples at all.
+- **What it didn't touch:** criterion 2 is still 0.351, because moving a threshold can't change scores. The evasion attacks that got "human" (diagnoses 2 and 3) and the malformed input (diagnosis 5) are unchanged.
 
 
 ---
