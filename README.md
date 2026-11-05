@@ -442,6 +442,14 @@ FP02 (formal register, 0.669) failed the same way, so this isn't a one-off. It m
 | 4.Appeal path: 3 real appeals + 1 fake id  | 4 of 4 | 4/4 | 4/4 |  4/4| MET |
 | 5. Bad input: 400 + rejected entry in log | 3 of 3 | 3/3 | 3/3 | 3/3 | MET |
 
+**How I decided each verdict:**
+
+1. **False positive — MET.** In all three trials, none of the 3 human texts got the "ai" guess, which is within "at most 2 of 3". To be honest, this target was too low: it would still pass if 2 of my 3 human writers were accused. The attack set also shows the problem my calibration texts missed. FP02 and FP05, both real human writing, were labeled "ai". This is the criterion I'd tighten, to "0 of 3 in every trial, and no false_positive attack labeled ai".
+2. **Score spread — MISSED.** The gap was 0.351 in all three trials, against a target of at least 1. The gap was the same every time, so this is not run-to-run noise. It is a miss in every trial. A gap of 1.0 is also impossible unless every score sits at exactly 0 or 1. See diagnosis 1.
+3. **Label coverage — MET.** Each of human, unsure and ai appeared at least once among the 5 texts in all three trials. The "running" text reached "unsure" only because the disagreement cap held it at 0.6.
+4. **Appeal path — MET.** In each trial, all 3 real appeals returned 200 with `under_review` and had a matching entry in the log, and the fake id returned 404. That is 4/4 in all three trials.
+5. **Bad input — MET.** Missing text, empty text and over-length text each returned 400, never 500, in all three trials, and each one wrote a rejected entry to the log. But the attack set found input this criterion didn't test: control characters, punctuation-only text and emoji were accepted with a 200. See diagnosis 5.
+
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
 
